@@ -2,6 +2,7 @@
 var express = require('express');
 var passport = require('passport');
 var InstagramStrategy = require('passport-instagram').Strategy;
+var FacebookStrategy = require ('passport-facebook').Strategy;
 var http = require('http');
 var path = require('path');
 var handlebars = require('express-handlebars');
@@ -10,6 +11,7 @@ var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var dotenv = require('dotenv');
 var Instagram = require('instagram-node-lib');
+var Facebook = require('fbgraph');
 var mongoose = require('mongoose');
 var app = express();
 
@@ -24,6 +26,12 @@ var INSTAGRAM_CALLBACK_URL = process.env.INSTAGRAM_CALLBACK_URL;
 var INSTAGRAM_ACCESS_TOKEN = "";
 Instagram.set('client_id', INSTAGRAM_CLIENT_ID);
 Instagram.set('client_secret', INSTAGRAM_CLIENT_SECRET);
+
+var FACEBOOK_CLIENT_ID = process.env.FACEBOOK_CLIENT_ID;
+var FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
+var FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL;
+var FACEBOOK_ACCESS_TOKEN = "";
+
 
 //connect to database
 mongoose.connect(process.env.MONGODB_CONNECTION_URL);
@@ -77,6 +85,23 @@ passport.use(new InstagramStrategy({
           return done(null, profile);
         });
       })
+    });
+  }
+));
+
+passport.use(new FacebookStrategy({
+  clientID: FACEBOOK_CLIENT_ID,
+  clientSecret: FACEBOOK_CLIENT_SECRET,
+  callbackURL: FACEBOOK_CALLBACK_URL
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOrCreate({
+      "name": profile.username,
+      "id": profile.id,
+      "access_token": accessToken
+    }, function(err, user) {
+      if (err) { return done(err); }
+      done(null, user);
     });
   }
 ));
@@ -137,6 +162,7 @@ app.get('/photos', ensureAuthenticated, function(req, res){
             //create temporary json object
             tempJSON = {};
             tempJSON.url = item.images.low_resolution.url;
+            tempJSON.caption = item.caption.text;
             //insert json object into image array
             return tempJSON;
           });
@@ -171,6 +197,12 @@ app.get('/auth/instagram/callback',
     res.redirect('/account');
   });
 
+app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/instagram/callback', 
+  passport.authenticate('facebook', { failureRedirect: '/login'}),
+  function(req, res) {
+    res.redirect('/fbaccount');
+  });
 app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
