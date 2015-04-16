@@ -95,7 +95,7 @@ passport.use(new FacebookStrategy({
   callbackURL: FACEBOOK_CALLBACK_URL
   },
   function(accessToken, refreshToken, profile, done) {
-    User.findOrCreate({
+    models.User.findOrCreate({
       "name": profile.username,
       "id": profile.id,
       "access_token": accessToken
@@ -148,6 +148,9 @@ app.get('/account', ensureAuthenticated, function(req, res){
   res.render('account', {user: req.user});
 });
 
+app.get('/fbaccount', ensureAuthenticated, function(req, res){
+  res.render('fbaccount', {user: req.user});
+});
 app.get('/photos', ensureAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
@@ -198,10 +201,10 @@ app.get('/auth/instagram/callback',
   });
 
 app.get('/auth/facebook', passport.authenticate('facebook'));
-app.get('/auth/instagram/callback', 
+app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/login'}),
   function(req, res) {
-    res.redirect('/fbaccount');
+    res.render('fbaccount');
   });
 app.get('/logout', function(req, res){
   req.logout();
