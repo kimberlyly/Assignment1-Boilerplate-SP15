@@ -151,16 +151,17 @@ app.get('/account', ensureAuthenticated, function(req, res){
 
 app.get('/fbaccount', ensureAuthenticated, function(req, res){
   //var query = models.User.where({{name: req.user.username });
-  var info, imageArr;
+  var info, imageArr = [];
   console.log(req.user.access_token);
   graph.get('/me?fields=name,birthday', function (err, data) {
     info = { "name": data.name, "birthday": data.birthday };
     graph.get('/me?fields=photos', function (err, data) {
-        imageArr = data.map(function(item) {
-          tempJSON = {};
-          tempJSON.url = item.images.source;
-          return tempJSON;
-        });
+      for (var a = 0; a < data.photos.data.length; a++) {
+        tempJSON = {};
+        tempJSON.url = data.photos.data[a].source;
+        imageArr.push(tempJSON);
+      }
+      console.log(imageArr); 
       res.render('fbaccount', {info: info, photos: imageArr});
     });
   });
