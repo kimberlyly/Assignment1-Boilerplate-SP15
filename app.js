@@ -68,21 +68,22 @@ passport.use(new InstagramStrategy({
   },
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
-    models.User.findOrCreate({
+    models.InstaUser.findOrCreate({
       "name": profile.username,
       "id": profile.id,
       "access_token": accessToken 
     }, function(err, user, created) {
       
       // created will be true here
-      models.User.findOrCreate({}, function(err, user, created) {
+      models.InstaUser.findOrCreate({}, function(err, user, created) {
         // created will be false here
         process.nextTick(function () {
           // To keep the example simple, the user's Instagram profile is returned to
           // represent the logged-in user.  In a typical application, you would want
           // to associate the Instagram account with a user record in your database,
           // and return that user instead.
-          return done(null, profile);
+//          return done(null, profile);
+            return done(null, user);
         });
       })
     });
@@ -96,7 +97,7 @@ passport.use(new FacebookStrategy({
   callbackURL: FACEBOOK_CALLBACK_URL
   },
   function(accessToken, refreshToken, profile, done) {
-    models.User.findOrCreate({
+    models.FBUser.findOrCreate({
       "name": profile.username,
       "id": profile.id,
       "access_token": accessToken
@@ -136,21 +137,29 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
+/* Method to get info from authenticated Instagram */
+function getInstaInfo() {
+  
+}
+/* Method to get info from authenticated Facebook */
 //routes
 app.get('/', function(req, res){
-  res.render('login');
+  res.render('login', { headertext: "Welcome", paragraph: "This is Instabook, an app that seamlessly integrates your Instagram and Facebook information into one convenient location on the web." });
 });
 
 app.get('/login', function(req, res){
-  res.render('login', { user: req.user });
+  res.render('login', { user: req.user, headertext: "Welcome", paragraph: "This is Instabook, an app that seamlessly integrates your Instagram and Facebook information into one convenient location on the web." });
 });
 
-app.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', {user: req.user});
-});
+app.get('/account', ensureAuthenticated, function(req, res){ 
+  var info;
+  graph.get('/me', function (err, data) {
+    info = { "name": data.name, "gender": data.gender, "birthday": data.birthday, };
+      res.render('account');
+    });
+  });
 
 app.get('/fbaccount', ensureAuthenticated, function(req, res){
-  //var query = models.User.where({{name: req.user.username });
   var info, imageArr = [];
   console.log(req.user.access_token);
   graph.get('/me?fields=name,birthday', function (err, data) {
@@ -168,8 +177,8 @@ app.get('/fbaccount', ensureAuthenticated, function(req, res){
 });
 
 app.get('/photos', ensureAuthenticated, function(req, res){
-  var query  = models.User.where({ name: req.user.username });
-  query.findOne(function (err, user) {
+  var instaquery  = models.InstaUser.where({ name: req.user.username });
+  instaquery.findOne(function (err, user) {
     if (err) return handleError(err);
     if (user) {
       // doc may be null if no document matched
@@ -182,7 +191,10 @@ app.get('/photos', ensureAuthenticated, function(req, res){
             //create temporary json object
             tempJSON = {};
             tempJSON.url = item.images.low_resolution.url;
-            tempJSON.caption = item.caption.text;
+            
+            if (item.caption.text) {
+              tempJSON.caption = item.caption.text;
+            }
             //insert json object into image array
             return tempJSON;
           });
@@ -214,15 +226,17 @@ app.get('/auth/instagram',
 app.get('/auth/instagram/callback', 
   passport.authenticate('instagram', { failureRedirect: '/login'}),
   function(req, res) {
-    res.redirect('/account');
+    console.log("Insta info: " + req.user);
+    res.redirect('/auth/facebook');
   });
 
 app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['user_about_me', 'user_birthday', 'user_friends', 'user_photos', 'user_relationships', 'user_likes', 'user_posts', 'user_status'] }));
 app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/login'}),
   function(req, res) {
+    console.log("Facebook info: " + req.user);
     graph.setAccessToken(req.user.access_token);
-    res.redirect('/fbaccount');
+    res.redirect('/account');
   });
 app.get('/logout', function(req, res){
   req.logout();
