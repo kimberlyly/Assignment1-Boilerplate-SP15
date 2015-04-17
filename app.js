@@ -11,7 +11,7 @@ var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var dotenv = require('dotenv');
 var Instagram = require('instagram-node-lib');
-var Facebook = require('fbgraph');
+var graph = require('fbgraph');
 var mongoose = require('mongoose');
 var app = express();
 
@@ -89,6 +89,7 @@ passport.use(new InstagramStrategy({
   }
 ));
 
+// Use the FacebookStrategy within Passport.
 passport.use(new FacebookStrategy({
   clientID: FACEBOOK_CLIENT_ID,
   clientSecret: FACEBOOK_CLIENT_SECRET,
@@ -149,7 +150,24 @@ app.get('/account', ensureAuthenticated, function(req, res){
 });
 
 app.get('/fbaccount', ensureAuthenticated, function(req, res){
-  res.render('fbaccount', {user: req.user});
+  //var query = models.User.where({{name: req.user.username });
+  var info, imageArr;
+  console.log(req.user.access_token);
+  graph.get('/me?fields=name,birthday', function (err, data) {
+    info = { "name": data.name, "birthday": data.birthday }; 
+    console.log(info);
+    console.log(data);
+  });
+  graph.get('/me?fields=photos', function (err, data) {
+      //console.log(data);
+	/*imageArr = data.map(function(item) {
+      tempJSON = {};
+      tempJSON.url = item.images.source;
+      return tempJSON; 
+    });*/
+  });
+  
+res.render('fbaccount', {info: info});
 });
 app.get('/photos', ensureAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
@@ -157,7 +175,8 @@ app.get('/photos', ensureAuthenticated, function(req, res){
     if (err) return handleError(err);
     if (user) {
       // doc may be null if no document matched
-      Instagram.users.liked_by_self({
+      Instagram.users.recent({
+        user_id: user.id,
         access_token: user.access_token,
         complete: function(data) {
           //Map will iterate through the returned data obj
@@ -200,11 +219,12 @@ app.get('/auth/instagram/callback',
     res.redirect('/account');
   });
 
-app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['user_about_me', 'user_birthday', 'user_friends', 'user_photos', 'user_relationships', 'user_likes', 'user_posts', 'user_status'] }));
 app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/login'}),
   function(req, res) {
-    res.render('fbaccount');
+    graph.setAccessToken(req.user.access_token);
+    res.redirect('/fbaccount');
   });
 app.get('/logout', function(req, res){
   req.logout();
