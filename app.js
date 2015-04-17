@@ -154,21 +154,18 @@ app.get('/fbaccount', ensureAuthenticated, function(req, res){
   var info, imageArr;
   console.log(req.user.access_token);
   graph.get('/me?fields=name,birthday', function (err, data) {
-    info = { "name": data.name, "birthday": data.birthday }; 
-    console.log(info);
-    console.log(data);
+    info = { "name": data.name, "birthday": data.birthday };
+    graph.get('/me?fields=photos', function (err, data) {
+        imageArr = data.map(function(item) {
+          tempJSON = {};
+          tempJSON.url = item.images.source;
+          return tempJSON;
+        });
+      res.render('fbaccount', {info: info, photos: imageArr});
+    });
   });
-  graph.get('/me?fields=photos', function (err, data) {
-      //console.log(data);
-	/*imageArr = data.map(function(item) {
-      tempJSON = {};
-      tempJSON.url = item.images.source;
-      return tempJSON; 
-    });*/
-  });
-  
-res.render('fbaccount', {info: info});
 });
+
 app.get('/photos', ensureAuthenticated, function(req, res){
   var query  = models.User.where({ name: req.user.username });
   query.findOne(function (err, user) {
