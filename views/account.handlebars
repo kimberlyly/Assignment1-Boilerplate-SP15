@@ -5,6 +5,7 @@
 <div class="row">
   <div class="col-md-6">
     <h2>From your <span class="insta">Instagram</span></h2>
+    <img src="{{instaInfo._json.data.profile_picture}}" class="account-icons">
     <p><strong>Name: </strong>{{instaInfo.displayName}}</p>
     <p><strong>Username: </strong>{{instaInfo.username}}</p>
     <p><strong>Bio: </strong>{{instaInfo._json.data.bio}}</p>
@@ -14,11 +15,11 @@
   </div>
   <div class="col-md-6">
     <h2>From your <span class="book">Facebook</span></h2>
+    <img src="{{fbUser.profile}}" class="account-icons">
     <p><strong>Name: </strong>{{fbUser.name}}</p>
     <p><strong>Gender: </strong>{{fbUser.gender}}</p>
     <p><strong>Birthday: </strong>{{fbUser.birthday}}</p>
     <p><strong>Friends: </strong>{{fbUser.friends}}</p>
-    <p><strong>Most Recent Status: </strong></p>
-    <img src="{{fbUser.profile}}" class="account-icons">{{fbUser.status}}
+    <p><strong>Most Recent Status: </strong>{{fbUser.status}}</p>
   </div>
 </div>

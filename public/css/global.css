@@ -69,8 +69,10 @@
 }
 
 .account-icons {
-  display: inline-block;
-  float: left;
+  display: block;
+  margin-bottom: 10px;
+  width: 50px;
+  height: auto;
 }
 
 .ppl-like {
@@ -83,5 +85,11 @@
 
 .popular-photo {
   display: block;
+  margin: 0 auto;
+}
+
+.insta-profile {
+  width: 50px;
+  height: auto;
   margin: 0 auto;
 }
