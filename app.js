@@ -172,24 +172,9 @@ app.get('/account', ensureAuthenticated, function(req, res){
   var fbUser; // to be populated
   var instaInfo = getInstaInfo();
   var instaUser = getInstaInfo().user; 
-  graph.get('/me?fields=name,gender,birthday,statuses.limit(1)', function (err, data) {
-    fbUser = { "name": data.name, "gender": data.gender, "birthday": data.birthday, "status": data.statuses.data[0].message };
+  graph.get('/me?fields=name,gender,birthday,statuses.limit(1),picture,friends', function (err, data) {
+    fbUser = { "name": data.name, "gender": data.gender, "birthday": data.birthday, "status": data.statuses.data[0].message, "profile": data.picture.data.url, "friends": data.friends.summary.total_count };
     res.render('account', { fbUser: fbUser, instaInfo: instaUser });
-  });
-});
-
-app.get('/fbaccount', ensureAuthenticated, function(req, res){
-  var info, imageArr = [];
-  graph.get('/me?fields=name,birthday', function (err, data) {
-    info = { "name": data.name, "birthday": data.birthday };
-    graph.get('/me?fields=photos', function (err, data) {
-      for (var a = 0; a < data.photos.data.length; a++) {
-        tempJSON = {};
-        tempJSON.url = data.photos.data[a].source;
-        imageArr.push(tempJSON);
-      }
-      res.render('fbaccount', {info: info, photos: imageArr});
-    });
   });
 });
 
@@ -234,6 +219,26 @@ app.get('/photos', ensureAuthenticated, function(req, res){
 app.get('/home', function(req, res) {
   res.render('home');
 });
+
+app.get('/popular', ensureAuthenticated, function(req, res) {
+  var maxValue = -1;
+  var maxMessage;
+  graph.get('/me?fields=statuses.limit(100){likes.limit(1000),message}', function (err, data) {
+    console.log(data.statuses.data[0].likes.data.length);
+    for (var i = 0; i < data.statuses.data.length; i++) {
+      console.log(i);
+      console.log(data.statuses.data[i].likes);
+      if (data.statuses.data[i].likes) {
+        if (data.statuses.data[i].likes.data.length > maxValue) {
+          maxValue = data.statuses.data[i].likes.data.length;
+          maxMessage = data.statuses.data[i].message;
+        }
+      }
+    }
+    res.render('popular', { message: maxMessage, likes: maxValue });
+  });
+});
+
 // GET /auth/instagram
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  The first step in Instagram authentication will involve

@@ -67,3 +67,16 @@
 .home-text {
   font-size: 16px;
 }
+
+.account-icons {
+  display: inline-block;
+  float: left;
+}
+
+.ppl-like {
+  display: block;
+  float: right;
+  color: #337ab7;
+  font-weight: bold;
+  font-size: 18px;
+}
