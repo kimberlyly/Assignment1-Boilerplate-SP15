@@ -57,3 +57,13 @@
   filter: alpha(opacity=100);
 }
 
+.home-icons {
+  width: 90px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+.home-text {
+  font-size: 16px;
+}

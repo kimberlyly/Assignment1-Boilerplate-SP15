@@ -5,21 +5,39 @@
 <a href="/auth/instagram"><button type="button" class="btn btn-primary login-btn">Login</button></a></div>
 <div class="row">
   <div class="col-md-4">
-    <h2>From your <span class="insta">Instagram</span></h2>
-    <p><strong>Name: </strong>{{instaInfo.displayName}}</p>
-    <p><strong>Username: </strong>{{instaInfo.username}}</p>
-    <p><strong>Bio: </strong>{{instaInfo._json.data.bio}}</p>
-    <p><strong>Following: </strong>{{instaInfo._json.data.counts.followed_by}}</p>
-    <p><strong>Followers: </strong>{{instaInfo._json.data.counts.follows}}</p>
-    <p><strong>Posts: </strong>{{instaInfo._json.data.counts.media}}</p>
+    <img src="http://i62.tinypic.com/a3oyz4.gif" class="home-icons">
+    <br>
+    <div class="home-text">
+    From <span class="insta">Instagram</span>, our app can pull information to see
+    <ul>
+      <li>Your photos and captions</li>
+      <li>Who's following you</li>
+      <li>Who you're following</li>
+    </ul>
+  </div>
   </div>
   <div class="col-md-4">
-    <h2>From your <span class="book">Facebook</span></h2>
-    <p><strong>Name: </strong>{{fbUser.name}}</p>
-    <p><strong>Gender: </strong>{{fbUser.gender}}</p>
-    <p><strong>Birthday: </strong>{{fbUser.birthday}}</p>
-    <p><strong>Most Recent Status: </strong>{{fbUser.status}}</p>
+    <img src="http://i61.tinypic.com/2ds1un5.png" class="home-icons">
+    <br>
+    <div class="home-text">
+    From <span class="book">Facebook</span>, our app can pull information to see
+    <ul>
+      <li>Your basic information</li>
+      <li>Your photos</li>
+      <li>Your statuses</li>
+    </ul>
+    </div>
   </div>
   <div class="col-md-4">
+    <img src="http://i61.tinypic.com/bgdbv7.png" class="home-icons">
+    <br>
+    <div class="home-text">
+    Putting all of this information together, we generate data about
+    <ul>
+      <li>Your most popular status</li>
+      <li>Your most popular picture</li>
+    </ul>
+    We are always adding new features to this app, so please check back regularly!
+    </div>
   </div>
 </div>

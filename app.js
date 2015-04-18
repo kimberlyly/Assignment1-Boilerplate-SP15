@@ -231,7 +231,7 @@ app.get('/photos', ensureAuthenticated, function(req, res){
   });
 });
 
-app.get('/home', ensureAuthenticated, function(req, res) {
+app.get('/home', function(req, res) {
   res.render('home');
 });
 // GET /auth/instagram
