@@ -1,0 +1,59 @@
+.insta {
+  font-family: 'Pacifico', cursive;
+}
+
+.navbar .insta {
+  color: #fff;
+}
+.book {
+  font-family: 'Droid Sans', sans-serif;
+}
+
+.navbar .book {
+  color: #fff;
+}
+
+.main-text {
+  text-align: center;
+  font-size: 18px;
+}
+
+.photos {
+  display: inline-block;
+}
+
+.photo-wrapper {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.fbphoto {
+  width: 320px;
+  height: auto;
+  display: inline-block;
+}
+
+.login-btn {
+  align: center;
+}
+
+.photo-element {
+  width: 306px;
+  height: auto;
+  display: inline-block;
+}
+
+.caption {
+  margin-bottom: 10px;
+}
+
+.tab-content img {
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+
+.tab-content img:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+

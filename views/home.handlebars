@@ -1,9 +1,10 @@
 <div class="jumbotron">
-<h1>Hi there, {{instaInfo.displayName}}!</h1>
-<p>This is your Account page, where we have aggregated your personal data from both Instagram and Facebook.</p>
-</div>
+<h1><span class="insta">Insta</span><span class="book">book</span></h1>
+<p>The functionality of both Instagram and Facebook, all in one handy web app. #tybg</p>
+<p>Ready to get started? All you need to do is login to your Instagram and Facebook.</p>
+<a href="/auth/instagram"><button type="button" class="btn btn-primary login-btn">Login</button></a></div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-4">
     <h2>From your <span class="insta">Instagram</span></h2>
     <p><strong>Name: </strong>{{instaInfo.displayName}}</p>
     <p><strong>Username: </strong>{{instaInfo.username}}</p>
@@ -12,11 +13,13 @@
     <p><strong>Followers: </strong>{{instaInfo._json.data.counts.follows}}</p>
     <p><strong>Posts: </strong>{{instaInfo._json.data.counts.media}}</p>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-4">
     <h2>From your <span class="book">Facebook</span></h2>
     <p><strong>Name: </strong>{{fbUser.name}}</p>
     <p><strong>Gender: </strong>{{fbUser.gender}}</p>
     <p><strong>Birthday: </strong>{{fbUser.birthday}}</p>
     <p><strong>Most Recent Status: </strong>{{fbUser.status}}</p>
+  </div>
+  <div class="col-md-4">
   </div>
 </div>

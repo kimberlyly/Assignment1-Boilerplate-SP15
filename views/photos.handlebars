@@ -1,6 +1,33 @@
-{{#each photos}}
-  <img src="{{url}}" class="img-responsive" class="img hashtag-img">
-  <br>
-  <i>{{caption}}</i>
-  <br>
-{{/each}}
+<div class="jumbotron">
+<h1>Whoa, looking good!</h1>
+<p>Tired of going back and forth between Instagram and Facebook to check out all of your selfies? Don't worry. We got you.</p>
+</div>
+<div role="tabpanel">
+  <ul id="tab-photos" class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#instaphotos" aria-controls="instaphotos" role="tab" data-toggle="tab">Instagram</a></li>
+    <li role="presentation"><a href="#fbphotos" aria-controls="fbphotos" role="tab" data-toggle="tab">Facebook</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="instaphotos">
+      <div class="photo-wrapper">
+        {{#each photos}}
+        <img src="{{url}}" class="img hashtag-img photos" data-toggle="tooltip" data-placement="bottom" title="{{caption}}">
+        {{/each}}
+      </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="fbphotos">
+      <div class="photo-wrapper"> 
+      {{#each fbphotos}}
+        <img src="{{url}}" class="img hashtag-img photos fbphoto" data-toggle="tooltip" data-placement="bottom" title="{{caption}}">
+       {{/each}}
+      </div>
+    </div>
+  </div> <!-- tab-pane -->
+</div> <!-- tabpanel -->
+
+<script type="text/javascript">
+  jQuery(document.ready(function ($) {
+    $('#tabphotos').tab();
+  });
+</script>

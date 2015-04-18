@@ -32,6 +32,8 @@ var FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
 var FACEBOOK_CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL;
 var FACEBOOK_ACCESS_TOKEN = "";
 
+//variables that need to be saved throughout program
+var instaAccount, fbAccount;
 
 //connect to database
 mongoose.connect(process.env.MONGODB_CONNECTION_URL);
@@ -82,8 +84,8 @@ passport.use(new InstagramStrategy({
           // represent the logged-in user.  In a typical application, you would want
           // to associate the Instagram account with a user record in your database,
           // and return that user instead.
-//          return done(null, profile);
-            return done(null, user);
+          return done(null, profile);
+//            return done(null, user);
         });
       })
     });
@@ -137,14 +139,29 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
+/* Method to set info from authenticated Instagram */
+function setInstaInfo(instaUser) {
+  instaAccount = instaUser;
+}
+
 /* Method to get info from authenticated Instagram */
 function getInstaInfo() {
-  
+  return instaAccount;  
 }
+
+/* Method to set info from authenticated Facebook */
+function setFBInfo(fbUser) {
+  fbAccount = fbUser;
+}
+
 /* Method to get info from authenticated Facebook */
+function getFBInfo() {
+  return fbAccount;
+}
+
 //routes
 app.get('/', function(req, res){
-  res.render('login', { headertext: "Welcome", paragraph: "This is Instabook, an app that seamlessly integrates your Instagram and Facebook information into one convenient location on the web." });
+  res.render('home', { headertext: "Welcome", paragraph: "This is Instabook, an app that seamlessly integrates your Instagram and Facebook information into one convenient location on the web." });
 });
 
 app.get('/login', function(req, res){
@@ -152,16 +169,17 @@ app.get('/login', function(req, res){
 });
 
 app.get('/account', ensureAuthenticated, function(req, res){ 
-  var info;
-  graph.get('/me', function (err, data) {
-    info = { "name": data.name, "gender": data.gender, "birthday": data.birthday, };
-      res.render('account');
-    });
+  var fbUser; // to be populated
+  var instaInfo = getInstaInfo();
+  var instaUser = getInstaInfo().user; 
+  graph.get('/me?fields=name,gender,birthday,statuses.limit(1)', function (err, data) {
+    fbUser = { "name": data.name, "gender": data.gender, "birthday": data.birthday, "status": data.statuses.data[0].message };
+    res.render('account', { fbUser: fbUser, instaInfo: instaUser });
   });
+});
 
 app.get('/fbaccount', ensureAuthenticated, function(req, res){
   var info, imageArr = [];
-  console.log(req.user.access_token);
   graph.get('/me?fields=name,birthday', function (err, data) {
     info = { "name": data.name, "birthday": data.birthday };
     graph.get('/me?fields=photos', function (err, data) {
@@ -170,42 +188,52 @@ app.get('/fbaccount', ensureAuthenticated, function(req, res){
         tempJSON.url = data.photos.data[a].source;
         imageArr.push(tempJSON);
       }
-      console.log(imageArr); 
       res.render('fbaccount', {info: info, photos: imageArr});
     });
   });
 });
 
 app.get('/photos', ensureAuthenticated, function(req, res){
-  var instaquery  = models.InstaUser.where({ name: req.user.username });
-  instaquery.findOne(function (err, user) {
-    if (err) return handleError(err);
-    if (user) {
-      // doc may be null if no document matched
-      Instagram.users.recent({
-        user_id: user.id,
-        access_token: user.access_token,
-        complete: function(data) {
-          //Map will iterate through the returned data obj
-          var imageArr = data.map(function(item) {
-            //create temporary json object
-            tempJSON = {};
-            tempJSON.url = item.images.low_resolution.url;
-            
-            if (item.caption.text) {
-              tempJSON.caption = item.caption.text;
-            }
-            //insert json object into image array
-            return tempJSON;
-          });
-          res.render('photos', {photos: imageArr});
-        }
-      }); 
+  var fbArr = [], imageArr = [];
+  var instaInfo = getInstaInfo();
+  var instaquery  = models.InstaUser.where({ name: getInstaInfo().user.username });
+    instaquery.findOne(function (err, user) {
+      if (err) return handleError(err);
+      if (user) {
+        // doc may be null if no document matched
+        Instagram.users.recent({
+          user_id: user.id,
+          access_token: user.access_token,
+          complete: function(data) {
+            //Map will iterate through the returned data obj
+            imageArr = data.map(function(item) {
+              //create temporary json object
+              tempJSON = {};
+              tempJSON.url = item.images.low_resolution.url;
+                   
+              if (item.caption.text) {
+                tempJSON.caption = item.caption.text;
+              }
+              //insert json object into image array
+              return tempJSON;
+            });
+          }
+        }); 
+      }
+    });
+  graph.get('/me?fields=photos', function (err, data) {
+    for (var a = 0; a < data.photos.data.length; a++) {
+      tempJSON = {};
+      tempJSON.url = data.photos.data[a].source;
+      fbArr.push(tempJSON);
     }
+    res.render('photos', { photos: imageArr, fbphotos: fbArr });
   });
 });
 
-
+app.get('/home', ensureAuthenticated, function(req, res) {
+  res.render('home');
+});
 // GET /auth/instagram
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  The first step in Instagram authentication will involve
@@ -226,15 +254,15 @@ app.get('/auth/instagram',
 app.get('/auth/instagram/callback', 
   passport.authenticate('instagram', { failureRedirect: '/login'}),
   function(req, res) {
-    console.log("Insta info: " + req.user);
+    setInstaInfo(req);
     res.redirect('/auth/facebook');
   });
 
-app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['user_about_me', 'user_birthday', 'user_friends', 'user_photos', 'user_relationships', 'user_likes', 'user_posts', 'user_status'] }));
+app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['user_about_me', 'user_birthday', 'user_friends', 'user_photos', 'user_relationships', 'user_likes', 'user_posts', 'user_status', 'read_stream'] }));
 app.get('/auth/facebook/callback', 
   passport.authenticate('facebook', { failureRedirect: '/login'}),
   function(req, res) {
-    console.log("Facebook info: " + req.user);
+    setFBInfo(req);
     graph.setAccessToken(req.user.access_token);
     res.redirect('/account');
   });
