@@ -80,3 +80,8 @@
   font-weight: bold;
   font-size: 18px;
 }
+
+.popular-photo {
+  display: block;
+  margin: 0 auto;
+}

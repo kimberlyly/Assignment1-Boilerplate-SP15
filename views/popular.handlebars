@@ -2,10 +2,17 @@
 <h1>Look at you, social butterfly!</h1>
 <p>Social media is ingrained in nearly every aspect of our lives. Why not gather data from it?</p>
 </div>
-<h2>Most popular status on <span class="book">Facebook</span></h2>
-{{message}}
-<br>
-<span class="ppl-like">{{likes}} people liked this!</span>
-<h2>Most popular image on <span class="insta">Instagram</span></h2>
-<img src="{{photo}}" class="popular-photo">
-<span class="ppl-like">{{instaLikes}} people liked this!</span>
+<div class="row">
+  <div class="col-md-6">
+        <h2>Most popular image on <span class="insta">Instagram</span></h2>
+        <img src="{{photo}}" class="popular-photo">
+        {{instaCaption}} <br>
+        <span class="ppl-like">{{instaLikes}} people liked this!</span>
+  </div>
+  <div class="col-md-6">
+        <h2>Most popular status on <span class="book">Facebook</span></h2>
+        {{message}}
+        <br>
+        <span class="ppl-like">{{likes}} people liked this!</span>
+  </div>
+</div>
