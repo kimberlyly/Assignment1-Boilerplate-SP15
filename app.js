@@ -221,8 +221,33 @@ app.get('/home', function(req, res) {
 });
 
 app.get('/popular', ensureAuthenticated, function(req, res) {
-  var maxValue = -1;
-  var maxMessage;
+  var maxFbLikes = -1, maxInstaLikes = -1;
+  var maxFbMessage, maxInstaPhoto;
+  var instaInfo = getInstaInfo();
+  var instaquery  = models.InstaUser.where({ name: getInstaInfo().user.username });
+    instaquery.findOne(function (err, user) {
+      if (err) return handleError(err);
+      if (user) {
+        // doc may be null if no document matched
+        Instagram.users.media.recent({
+          user_id: user.id,
+          access_token: user.access_token,
+          count: 1000,
+          complete: function(data) {
+            //Map will iterate through the returned data obj
+            for (var i = 0; i < data.length; i++) {
+              if (data[i].likes) {
+                if (data[i].likes.count > maxInstaLikes) {
+                  maxInstaLikes = data[i].likes.count;
+                  maxInstaPhoto = data[i].images.low_resolution.url;
+                }
+              }
+            }
+            }
+            });
+          }
+        }); 
+    });
   graph.get('/me?fields=statuses.limit(100){likes.limit(1000),message}', function (err, data) {
     console.log(data.statuses.data[0].likes.data.length);
     for (var i = 0; i < data.statuses.data.length; i++) {
@@ -230,12 +255,12 @@ app.get('/popular', ensureAuthenticated, function(req, res) {
       console.log(data.statuses.data[i].likes);
       if (data.statuses.data[i].likes) {
         if (data.statuses.data[i].likes.data.length > maxValue) {
-          maxValue = data.statuses.data[i].likes.data.length;
-          maxMessage = data.statuses.data[i].message;
+          maxFbLikes = data.statuses.data[i].likes.data.length;
+          maxFbMessage = data.statuses.data[i].message;
         }
       }
     }
-    res.render('popular', { message: maxMessage, likes: maxValue });
+    res.render('popular', { message: maxFbMessage, likes: maxFbLikes, photo: maxInstaPhoto, instaLikes: maxInstaLikes });
   });
 });
 
