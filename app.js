@@ -251,10 +251,7 @@ app.get('/popular', ensureAuthenticated, function(req, res) {
           }
         }); 
   graph.get('/me?fields=statuses.limit(100){likes.limit(1000),message}', function (err, data) {
-    console.log(data.statuses.data[0].likes.data.length);
     for (var i = 0; i < data.statuses.data.length; i++) {
-      console.log(i);
-      console.log(data.statuses.data[i].likes);
       if (data.statuses.data[i].likes) {
         if (data.statuses.data[i].likes.data.length > maxFbLikes) {
           maxFbLikes = data.statuses.data[i].likes.data.length;
